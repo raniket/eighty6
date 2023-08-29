@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model IndegoSnapshot {
+  id        Int         @id @default(autoincrement())
+  at        DateTime
+  weather   WeatherData @relation(fields: [weatherId], references: [id])
+  weatherId Int
+  stations  Station[]
+
+  @@index([at])
+}
+
+model WeatherData {
+  id              Int              @id @default(autoincrement())
+  lat             Float
+  lon             Float
+  timezone        String
+  timezone_offset Int
+  current         Json
+  minutely        Json
+  hourly          Json
+  daily           Json
+  snapshots       IndegoSnapshot[]
+}
+
+model Station {
+  id         Int            @id @default(autoincrement())
+  kioskId    Int
+  at         DateTime
+  features   Json
+  snapshot   IndegoSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshotId Int
+
+  @@index([kioskId])
+}
